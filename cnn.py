@@ -1,4 +1,5 @@
-
+import tensorflow as tf
+import keras
 from keras.models import Sequential
 from keras.layers import Convolution2D
 from keras.layers import MaxPooling2D
@@ -9,7 +10,7 @@ from keras.layers import Dense
 classifier = Sequential()
 
 # step 1 - Convolution
-classifier.add(Convolution2D(32, 3, 3, input_shape = (64, 64, 3), activation = 'relu'))
+classifier.add(Convolution2D(32, (3,3), input_shape = (64, 64, 3), activation = 'relu'))
 
 # step 2 - Pooling
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
@@ -22,9 +23,9 @@ classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Flatten())
 
 # step 4 - YSA
-classifier.add(Dense(output_dim = 128, activation = 'relu'))
-classifier.add(Dense(output_dim = 64, activation = 'relu'))
-classifier.add(Dense(output_dim = 1, activation = 'sigmoid'))
+classifier.add(Dense(128, activation = 'relu'))
+classifier.add(Dense(64, activation = 'relu'))
+classifier.add(Dense(1, activation = 'sigmoid'))
 
 # CNN
 classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
@@ -43,25 +44,24 @@ test_datagen = ImageDataGenerator(rescale = 1./255,
                                     zoom_range = 0.2,
                                     horizontal_flip = True)
 
-training_set = train_datagen.flow_from_directory('veriler/training_set',
+training_set = train_datagen.flow_from_directory(r'C:\Users\90534\Desktop\Belgeler\Yaptigim projeler\CInsiyet CNN\Gender-detection-using-CNN\data/training_set',
                                                   target_size = (64, 64),
                                                   batch_size = 1,
                                                   class_mode = 'binary')
 
-test_set = test_datagen.flow_from_directory('veriler/test_set',
+test_set = test_datagen.flow_from_directory(r'C:\Users\90534\Desktop\Belgeler\Yaptigim projeler\CInsiyet CNN\Gender-detection-using-CNN\data/test_set',
                                             target_size = (64, 64),
                                             batch_size = 1,
                                             class_mode = 'binary')
 
-classifier.fit_generator(training_set,
-                          samples_per_epoch = 8000,
-                          nb_epoch = 10,
-                          validation_data = test_set,
-                          nb_val_samples = 2000)
+classifier.fit(training_set,
+
+               epochs = 10,
+               validation_data = test_set)
 
 import numpy as np
 import pandas as pd
-
+classifier.save("gender_detector.model", save_format="h5")
 
 test_set.reset()
 pred=classifier.predict_generator(test_set,verbose=1)
